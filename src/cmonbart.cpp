@@ -24,28 +24,28 @@ using std::endl;
 
 #include "mBART.h"
 
+// [[Rcpp::export(rng = false)]]
 RcppExport SEXP cmonbart(
-   SEXP _ix,            //x, train,  pxn (transposed so rows are contiguous in memory)
-   SEXP _iy,
-   SEXP _ixp,
-   SEXP _itau,
-   SEXP _inu,
-   SEXP _ilambda,
-   SEXP _ibase,
-   SEXP _ipower,
-   SEXP _ioffset,
-   SEXP _ind,
-   SEXP _iburn,
-   SEXP _im,
-   SEXP _imgsize,
-   SEXP _inkeeptrain,
-   SEXP _inkeeptest,
-   SEXP _inkeeptestme,
-   SEXP _inkeeptreedraws,
-   SEXP _inprintevery
+   SEXP ix,            //x, train,  pxn (transposed so rows are contiguous in memory)
+   SEXP iy,
+   SEXP ixp,
+   SEXP itau,
+   SEXP inu,
+   SEXP ilambda,
+   SEXP ibase,
+   SEXP ipower,
+   SEXP ioffset,
+   SEXP ind,
+   SEXP iburn,
+   SEXP im,
+   SEXP imgsize,
+   SEXP inkeeptrain,
+   SEXP inkeeptest,
+   SEXP inkeeptestme,
+   SEXP inkeeptreedraws,
+   SEXP inprintevery
 )
 {
-   Rprintf("*****Into main of monotonic bart\n");
    //-----------------------------------------------------------
    //random number generation
    GetRNGstate();
@@ -56,37 +56,38 @@ RcppExport SEXP cmonbart(
 
    //--------------------------------------------------
    //process args
-   Rcpp::NumericMatrix xm(_ix);
+   Rcpp::NumericMatrix xm(ix);
    double *x = &xm[0];
-   Rcpp::NumericVector yv(_iy);
+   Rcpp::NumericVector yv(iy);
    double *y = &yv[0];
   
 
-   Rcpp::NumericMatrix xpm(_ixp);
+   Rcpp::NumericMatrix xpm(ixp);
 
 
    size_t p = xm.nrow();
    size_t n = xm.ncol();
    size_t np = xpm.ncol();
-   double *xp;
+   double *xp = nullptr;
    if(np)  xp = &xpm[0];
 
-   double tau = Rcpp::as<double>(_itau);
-   double nu = Rcpp::as<double>(_inu);
-   double lambda = Rcpp::as<double>(_ilambda);
-   double alpha = Rcpp::as<double>(_ibase);
-   double mybeta = Rcpp::as<double>(_ipower);
-   double offset = Rcpp::as<double>(_ioffset);
-   size_t nd = Rcpp::as<int>(_ind);
-   size_t burn = Rcpp::as<int>(_iburn);
-   size_t m = Rcpp::as<int>(_im);
-   size_t nm = Rcpp::as<int>(_imgsize);
+   double tau = Rcpp::as<double>(itau);
+   double nu = Rcpp::as<double>(inu);
+   double lambda = Rcpp::as<double>(ilambda);
+   (void) lambda;
+   double alpha = Rcpp::as<double>(ibase);
+   double mybeta = Rcpp::as<double>(ipower);
+   double offset = Rcpp::as<double>(ioffset);
+   size_t nd = Rcpp::as<int>(ind);
+   size_t burn = Rcpp::as<int>(iburn);
+   size_t m = Rcpp::as<int>(im);
+   size_t nm = Rcpp::as<int>(imgsize);
 
-   size_t nkeeptrain = Rcpp::as<int>(_inkeeptrain);
-   size_t nkeeptest = Rcpp::as<int>(_inkeeptest);
-   size_t nkeeptestme = Rcpp::as<int>(_inkeeptestme);
-   size_t nkeeptreedraws = Rcpp::as<int>(_inkeeptreedraws);
-   size_t printevery = Rcpp::as<int>(_inprintevery);
+   size_t nkeeptrain = Rcpp::as<int>(inkeeptrain);
+   size_t nkeeptest = Rcpp::as<int>(inkeeptest);
+   size_t nkeeptestme = Rcpp::as<int>(inkeeptestme);
+   size_t nkeeptreedraws = Rcpp::as<int>(inkeeptreedraws);
+   size_t printevery = Rcpp::as<int>(inprintevery);
 
    size_t skiptr,skipte,skipteme,skiptreedraws;
    if(nkeeptrain) {skiptr=nd/nkeeptrain;}
@@ -126,41 +127,6 @@ RcppExport SEXP cmonbart(
    Rprintf("m (ntree): %ld\n",m);
    Rprintf("nm (mu grid size): %ld\n",nm);
    */
-
-   Rprintf("**********************\n");
-   Rprintf("n: %ld\n",n);
-   Rprintf("p: %ld\n",p);
-   Rprintf("first and last y: %lf, %lf\n",y[0],y[n-1]);
-   Rprintf("first row: %lf, %lf\n",x[0],x[p-1]);
-   Rprintf("second row: %lf, %lf\n",x[p],x[2*p-1]);
-   Rprintf("last row: %lf, %lf\n",x[(n-1)*p],x[n*p-1]);
-   if(np) {
-      Rprintf("np: %d\n",np);
-      Rprintf("first row xp: %lf, %lf\n",xp[0],xp[p-1]);
-      Rprintf("second row xp: %lf, %lf\n",xp[p],xp[2*p-1]);
-      Rprintf("last row xp : %lf, %lf\n",xp[(np-1)*p],xp[np*p-1]);
-   } else {
-      Rprintf("no test observations\n");
-   }
-   Rprintf("tau: %lf\n",tau);
-   Rprintf("nu: %lf\n",nu);
-   Rprintf("lambda: %lf\n",lambda);
-   //Rprintf("sigest: %lf\n",sigest);
-   Rprintf("tree prior base: %lf\n",alpha);
-   Rprintf("tree prior power: %lf\n",mybeta);
-   Rprintf("offset: %ld\n",offset);
-   Rprintf("burn (nskip): %ld\n",burn);
-   Rprintf("nd (ndpost): %ld\n",nd);
-   Rprintf("m (ntree): %ld\n",m);
-   Rprintf("nm (mu grid size): %ld\n",nm);
-   Rprintf("*****nkeeptrain,nkeeptest,nkeeptestme, nkeeptreedraws: %d, %d, %d, %d\n",
-               nkeeptrain,nkeeptest,nkeeptestme,nkeeptreedraws);
-   Rprintf("*****printevery: %d\n",printevery);
-   Rprintf("*****skiptr,skipte,skipteme,skiptreedraws: %d,%d,%d,%d\n",
-               skiptr,skipte,skipteme,skiptreedraws);
-   Rprintf("**********************\n");
-
-
 
    //--------------------------------------------------
    //--------------------------------------------------
@@ -207,14 +173,12 @@ RcppExport SEXP cmonbart(
    }
    allys.n = n;
    double ybar = allys.sy/n; //sample mean
-   cout << "ybar: " << ybar<<  endl;
 
 
    //--------------------------------------------------
    //process test data
    dinfo dip; //data information for prediction
-   dip.n=np; dip.p=p; dip.x = &xp[0]; dip.y=0;
-   Rprintf("dip.n: %ld\n",dip.n);
+   dip.n=np; dip.p=p; dip.x = xp; dip.y=0;
 
 
    //--------------------------------------------------
@@ -222,10 +186,6 @@ RcppExport SEXP cmonbart(
    xinfo xi;
    size_t nc=100; //100 equally spaced cutpoints from min to max.
    makexinfo(p,n,&x[0],xi,nc);
-   Rprintf("x1 cuts: %lf ... %lf\n",xi[0][0],xi[0][nc-1]);
-   if(p>1) {
-      Rprintf("xp cuts: %lf ... %lf\n",xi[p-1][0],xi[p-1][nc-1]);
-   }
 
    //--------------------------------------------------
    //trees
@@ -284,17 +244,11 @@ RcppExport SEXP cmonbart(
       fpredtemp = new double[dip.n];
       for(size_t i=0;i<dip.n;i++) ppredmean[i]=0.0;
    }
-   //for sigma draw
-   double rss;  //residual sum of squares
-   double restemp; //a residual
-
    //--------------------------------------------------
    //return data structures using Rcpp
    //draws
    Rcpp::NumericVector sdraw(nd+burn);
-   Rprintf("nkeeptrain,n: %d,%d\n",nkeeptrain,n);
    Rcpp::NumericMatrix trdraw(nkeeptrain,n);
-   Rprintf("nkeeptrain,n: %d,%d\n",nkeeptrain,n);
    Rcpp::NumericMatrix tedraw(nkeeptest,np);
    //means
    Rcpp::NumericVector trmean(n); //train
@@ -309,19 +263,18 @@ RcppExport SEXP cmonbart(
 
    //--------------------------------------------------
    //mcmc
-   cout << "\nMCMC:\n";
    time_t tp;
    int time1 = time(&tp);
    gen.set_df(n+nu);
    size_t trcnt=0;
    size_t tecnt=0;
    size_t temecnt=0;
-   size_t treedrawscnt=0;
    bool keeptest,keeptestme,keeptreedraw;
 
    for(size_t i=0;i<(nd+burn);i++) {
 
-      if(i%printevery==0) cout << "i: " << i << ", out of " << nd+burn << endl;
+      if(printevery > 0 && i%printevery==0)
+         cout << "Iteration " << i << " of " << nd+burn << endl;
       //draw trees
       for(size_t j=0;j<m;j++) {
          fit(t[j],xi,di,ftemp);
@@ -393,17 +346,17 @@ RcppExport SEXP cmonbart(
          keeptreedraw = nkeeptreedraws && (((i-burn+1) % skiptreedraws) ==0);
          if(keeptreedraw) {
             for(size_t jj=0;jj<m;jj++) treess << t[jj];
-            treedrawscnt +=1;
          }
       }
    }
    int time2 = time(&tp);
-   cout << "time for loop: " << time2-time1 << endl;
-   Rprintf("check counts\n");
-   Rprintf("trcnt,tecnt,temecnt,treedrawscnt: %d,%d,%d, %d\n",trcnt,tecnt,temecnt,treedrawscnt);
+   if(printevery > 0)
+      cout << "Elapsed sampler time: " << time2-time1 << " seconds" << endl;
 
    for(size_t k=0;k<n;k++) trmean[k]/=nd;
-   for(size_t k=0;k<np;k++) temean[k]/=temecnt;
+   if(temecnt > 0) {
+      for(size_t k=0;k<np;k++) temean[k]/=temecnt;
+   }
 
    //--------------------------------------------------
    PutRNGstate();

@@ -1,7 +1,7 @@
-Package: mBARTprobit
+Package: pmBART
 Type: Package
-Title: Monotonic BART with Probit Link for Binary Outcomes
-Version: 0.1.0
+Title: Probit Monotone BART for Binary Outcomes
+Version: 0.2.0
 Authors@R: c(
     person(
       "Jared", "Fisher",
@@ -9,9 +9,16 @@ Authors@R: c(
       role = c("aut", "cre")
     )
   )
-Description: Regresses binary outcomes on covariates of interest using a sum of regression trees. The trees are constrained to be monotonic functions. 
-License: GPL (>=2)
+Description: Fits Bayesian additive regression tree models for binary outcomes
+    using a probit link. The regression surface is constrained to be
+    non-decreasing in every predictor. The package provides posterior draws and
+    posterior mean probabilities for training and optional test observations.
+License: GPL (>= 2)
 Encoding: UTF-8
-LazyData: true
+Roxygen: list(markdown = TRUE)
 Imports: Rcpp
 LinkingTo: Rcpp
+Suggests:
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+Config/roxygen2/version: 8.0.0
