@@ -12,7 +12,7 @@ Authors@R: c(
 Description: Fits Bayesian additive regression tree models for binary outcomes
     using a probit link. The regression surface is constrained to be
     non-decreasing in every predictor. The package provides posterior draws and
-    posterior mean probabilities for training and optional test observations.
+    posterior mean probabilities for training and optional test observations. Code borrowed from the Monotone BART package created by Rob McCulloch and Rodney Sparapani. 
 License: GPL (>= 2)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
