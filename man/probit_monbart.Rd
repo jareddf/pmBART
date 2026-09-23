@@ -16,14 +16,13 @@ probit_monbart(
   base = 0.25,
   sigmaf = NA,
   lambda = NA,
-  offset = NULL,
+  offset = stats::qnorm(mean(y.train)),
   ntree = 200,
   ndpost = 1000,
   nskip = 100,
   mgsize = 50,
   nkeeptrain = ndpost,
   nkeeptest = ndpost,
-  nkeeptestmean = ndpost,
   nkeeptreedraws = ndpost,
   printevery = 0
 )
@@ -38,9 +37,10 @@ observations and columns are predictors.}
 save posterior predictions. It must have the same columns, in the same
 order, as \code{x.train}.}
 
-\item{sigest, sigdf, sigquant, sigmaf, lambda}{Legacy compatibility arguments.
-They are currently ignored because the latent probit variance is fixed at
-one.}
+\item{sigest, sigquant, sigmaf, lambda}{Legacy compatibility arguments. They
+are currently ignored because the latent probit variance is fixed at one.}
+
+\item{sigdf}{Degrees-of-freedom parameter used by the sampler.}
 
 \item{k}{Prior shrinkage parameter. Larger values shrink individual trees
 more strongly.}
@@ -63,9 +63,6 @@ retain none. The value must divide \code{ndpost}.}
 
 \item{nkeeptest}{Number of posterior test draws to retain. Use zero to retain
 none. The value must divide \code{ndpost}.}
-
-\item{nkeeptestmean}{Number of test iterations used to calculate the native
-posterior mean. Use zero to disable it. The value must divide \code{ndpost}.}
 
 \item{nkeeptreedraws}{Number of serialized tree draws to retain. Use zero to
 retain none. The value must divide \code{ndpost}.}
@@ -95,9 +92,9 @@ The monotonicity constraint is increasing for every predictor. Reverse a
 predictor before fitting if scientific knowledge requires its effect to be
 decreasing. Missing or infinite values are not supported.
 
-\code{nkeeptrain}, \code{nkeeptest}, \code{nkeeptestmean}, and \code{nkeeptreedraws} control
-thinning independently. Each nonzero value must be no larger than, and
-divide, \code{ndpost}.
+\code{nkeeptrain}, \code{nkeeptest}, and \code{nkeeptreedraws} control thinning
+independently. Each nonzero value must be no larger than, and divide,
+\code{ndpost}.
 }
 \examples{
 set.seed(42)

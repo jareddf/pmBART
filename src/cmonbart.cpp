@@ -41,7 +41,6 @@ RcppExport SEXP cmonbart(
    SEXP imgsize,
    SEXP inkeeptrain,
    SEXP inkeeptest,
-   SEXP inkeeptestme,
    SEXP inkeeptreedraws,
    SEXP inprintevery
 )
@@ -85,17 +84,14 @@ RcppExport SEXP cmonbart(
 
    size_t nkeeptrain = Rcpp::as<int>(inkeeptrain);
    size_t nkeeptest = Rcpp::as<int>(inkeeptest);
-   size_t nkeeptestme = Rcpp::as<int>(inkeeptestme);
    size_t nkeeptreedraws = Rcpp::as<int>(inkeeptreedraws);
    size_t printevery = Rcpp::as<int>(inprintevery);
 
-   size_t skiptr,skipte,skipteme,skiptreedraws;
+   size_t skiptr,skipte,skiptreedraws;
    if(nkeeptrain) {skiptr=nd/nkeeptrain;}
    else skiptr = nd+1;
    if(nkeeptest) {skipte=nd/nkeeptest;}
    else skipte=nd+1;
-   if(nkeeptestme) {skipteme=nd/nkeeptestme;}
-   else skipteme=nd+1;
    if(nkeeptreedraws) {skiptreedraws = nd/nkeeptreedraws;}
    else skiptreedraws=nd+1;
 
@@ -250,11 +246,6 @@ RcppExport SEXP cmonbart(
    Rcpp::NumericVector sdraw(nd+burn);
    Rcpp::NumericMatrix trdraw(nkeeptrain,n);
    Rcpp::NumericMatrix tedraw(nkeeptest,np);
-   //means
-   Rcpp::NumericVector trmean(n); //train
-   for(int i=0;i<n;i++) trmean[i]=0.0;
-   Rcpp::NumericVector temean(np);
-   for(int i=0;i<np;i++) temean[i]=0.0;
    //trees
    std::stringstream treess;  //string stream to write trees to
    treess.precision(10);
@@ -268,8 +259,7 @@ RcppExport SEXP cmonbart(
    gen.set_df(n+nu);
    size_t trcnt=0;
    size_t tecnt=0;
-   size_t temecnt=0;
-   bool keeptest,keeptestme,keeptreedraw;
+   bool keeptest,keeptreedraw;
 
    for(size_t i=0;i<(nd+burn);i++) {
 
@@ -316,8 +306,6 @@ RcppExport SEXP cmonbart(
 
 
       if(i>=burn) {
-         for(size_t k=0;k<n;k++) trmean[k]+=allfit[k];
-
          if(nkeeptrain && (((i-burn+1) % skiptr) ==0)) {
             for(size_t k=0;k<n;k++) trdraw(trcnt,k)=allfit[k];
             trcnt+=1;
@@ -327,8 +315,7 @@ RcppExport SEXP cmonbart(
 
 
          keeptest = nkeeptest && (((i-burn+1) % skipte) ==0) && np;
-         keeptestme = nkeeptestme && (((i-burn+1) % skipteme) ==0) && np;
-         if(keeptest || keeptestme) {
+         if(keeptest) {
             for(size_t j=0;j<dip.n;j++) ppredmean[j]=0.0;
             for(size_t j=0;j<m;j++) {
                fit(t[j],xi,dip,fpredtemp);
@@ -338,10 +325,6 @@ RcppExport SEXP cmonbart(
          if(keeptest) {
             for(size_t k=0;k<np;k++) tedraw(tecnt,k)=ppredmean[k];
             tecnt+=1;
-         }
-         if(keeptestme) {
-            for(size_t k=0;k<np;k++) temean[k]+=ppredmean[k];
-            temecnt+=1;
          }
          keeptreedraw = nkeeptreedraws && (((i-burn+1) % skiptreedraws) ==0);
          if(keeptreedraw) {
@@ -353,11 +336,6 @@ RcppExport SEXP cmonbart(
    if(printevery > 0)
       cout << "Elapsed sampler time: " << time2-time1 << " seconds" << endl;
 
-   for(size_t k=0;k<n;k++) trmean[k]/=nd;
-   if(temecnt > 0) {
-      for(size_t k=0;k<np;k++) temean[k]/=temecnt;
-   }
-
    //--------------------------------------------------
    PutRNGstate();
 
@@ -366,8 +344,6 @@ RcppExport SEXP cmonbart(
    ret["sigma"]=sdraw;
    ret["yhat.train"]=trdraw;
    ret["yhat.test"]=tedraw;
-   ret["yhat.train.mean"]=trmean;
-   ret["yhat.test.mean"]=temean;
 
 
    //trees

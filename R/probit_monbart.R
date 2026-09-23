@@ -10,9 +10,9 @@
 #' @param x.test Optional numeric matrix or data frame of predictors at which to
 #'   save posterior predictions. It must have the same columns, in the same
 #'   order, as `x.train`.
-#' @param sigest,sigdf,sigquant,sigmaf,lambda Legacy compatibility arguments.
-#'   They are currently ignored because the latent probit variance is fixed at
-#'   one.
+#' @param sigest,sigquant,sigmaf,lambda Legacy compatibility arguments. They
+#'   are currently ignored because the latent probit variance is fixed at one.
+#' @param sigdf Degrees-of-freedom parameter used by the sampler.
 #' @param k Prior shrinkage parameter. Larger values shrink individual trees
 #'   more strongly.
 #' @param power,base Parameters controlling the tree-depth prior.
@@ -26,8 +26,6 @@
 #'   retain none. The value must divide `ndpost`.
 #' @param nkeeptest Number of posterior test draws to retain. Use zero to retain
 #'   none. The value must divide `ndpost`.
-#' @param nkeeptestmean Number of test iterations used to calculate the native
-#'   posterior mean. Use zero to disable it. The value must divide `ndpost`.
 #' @param nkeeptreedraws Number of serialized tree draws to retain. Use zero to
 #'   retain none. The value must divide `ndpost`.
 #' @param printevery Print sampler progress every this many iterations. Use zero
@@ -49,9 +47,9 @@
 #' predictor before fitting if scientific knowledge requires its effect to be
 #' decreasing. Missing or infinite values are not supported.
 #'
-#' `nkeeptrain`, `nkeeptest`, `nkeeptestmean`, and `nkeeptreedraws` control
-#' thinning independently. Each nonzero value must be no larger than, and
-#' divide, `ndpost`.
+#' `nkeeptrain`, `nkeeptest`, and `nkeeptreedraws` control thinning
+#' independently. Each nonzero value must be no larger than, and divide,
+#' `ndpost`.
 #'
 #' @examples
 #' set.seed(42)
@@ -76,12 +74,11 @@ probit_monbart <- function(
     power = 0.8, base = 0.25,
     sigmaf = NA,
     lambda = NA,
-    offset = NULL,
+    offset = stats::qnorm(mean(y.train)),
     ntree = 200,
     ndpost = 1000, nskip = 100,
     mgsize = 50,
     nkeeptrain = ndpost, nkeeptest = ndpost,
-    nkeeptestmean = ndpost,
     nkeeptreedraws = ndpost,
     printevery = 0
 ) {
@@ -125,7 +122,6 @@ probit_monbart <- function(
   keep <- c(
     nkeeptrain = nkeeptrain,
     nkeeptest = nkeeptest,
-    nkeeptestmean = nkeeptestmean,
     nkeeptreedraws = nkeeptreedraws
   )
   for (nm in names(keep)) {
@@ -135,50 +131,41 @@ probit_monbart <- function(
   .check_scalar(k, "k", lower = 0, open_lower = TRUE)
   .check_scalar(base, "base", lower = 0, upper = 1, open_lower = TRUE)
   .check_scalar(power, "power", lower = 0)
-  if (is.null(offset)) {
-    offset <- stats::qnorm(mean(y.train))
-  }
+  .check_scalar(sigdf, "sigdf", lower = 0, open_lower = TRUE)
   .check_scalar(offset, "offset")
 
   tau <- sqrt(1.467) * 3 / (k * sqrt(ntree))
-  nu <- 3
+  nu <- sigdf
   lambda <- 1
 
   res <- cmonbart(
     t(x.train), y.train, t(x.test),
     tau, nu, lambda, base, power, offset,
     ndpost, nskip, ntree, mgsize,
-    nkeeptrain, nkeeptest, nkeeptestmean,
-    nkeeptreedraws, printevery
+    nkeeptrain, nkeeptest, nkeeptreedraws, printevery
   )
 
   res$yhat.train <- res$yhat.train + offset
-  res$yhat.train.mean <- res$yhat.train.mean + offset
   res$prob.train <- stats::pnorm(res$yhat.train)
   res$prob.train.mean <- if (nrow(res$prob.train) > 0L) {
     colMeans(res$prob.train)
   } else {
-    stats::pnorm(res$yhat.train.mean)
+    rep(NA_real_, nrow(x.train))
   }
 
   res$yhat.test <- res$yhat.test + offset
-  res$yhat.test.mean <- res$yhat.test.mean + offset
   res$prob.test <- stats::pnorm(res$yhat.test)
   res$prob.test.mean <- if (nrow(res$prob.test) > 0L) {
     colMeans(res$prob.test)
-  } else if (nkeeptestmean > 0L) {
-    stats::pnorm(res$yhat.test.mean)
   } else {
     rep(NA_real_, nrow(x.test))
   }
 
   colnames(res$yhat.train) <- rownames(x.train)
   colnames(res$prob.train) <- rownames(x.train)
-  names(res$yhat.train.mean) <- rownames(x.train)
   names(res$prob.train.mean) <- rownames(x.train)
   colnames(res$yhat.test) <- rownames(x.test)
   colnames(res$prob.test) <- rownames(x.test)
-  names(res$yhat.test.mean) <- rownames(x.test)
   names(res$prob.test.mean) <- rownames(x.test)
 
   res$nkeeptreedraws <- nkeeptreedraws

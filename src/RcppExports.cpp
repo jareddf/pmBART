@@ -11,8 +11,8 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // cmonbart
-RcppExport SEXP cmonbart(SEXP ix, SEXP iy, SEXP ixp, SEXP itau, SEXP inu, SEXP ilambda, SEXP ibase, SEXP ipower, SEXP ioffset, SEXP ind, SEXP iburn, SEXP im, SEXP imgsize, SEXP inkeeptrain, SEXP inkeeptest, SEXP inkeeptestme, SEXP inkeeptreedraws, SEXP inprintevery);
-RcppExport SEXP _pmBART_cmonbart(SEXP ixSEXP, SEXP iySEXP, SEXP ixpSEXP, SEXP itauSEXP, SEXP inuSEXP, SEXP ilambdaSEXP, SEXP ibaseSEXP, SEXP ipowerSEXP, SEXP ioffsetSEXP, SEXP indSEXP, SEXP iburnSEXP, SEXP imSEXP, SEXP imgsizeSEXP, SEXP inkeeptrainSEXP, SEXP inkeeptestSEXP, SEXP inkeeptestmeSEXP, SEXP inkeeptreedrawsSEXP, SEXP inprinteverySEXP) {
+RcppExport SEXP cmonbart(SEXP ix, SEXP iy, SEXP ixp, SEXP itau, SEXP inu, SEXP ilambda, SEXP ibase, SEXP ipower, SEXP ioffset, SEXP ind, SEXP iburn, SEXP im, SEXP imgsize, SEXP inkeeptrain, SEXP inkeeptest, SEXP inkeeptreedraws, SEXP inprintevery);
+RcppExport SEXP _pmBART_cmonbart(SEXP ixSEXP, SEXP iySEXP, SEXP ixpSEXP, SEXP itauSEXP, SEXP inuSEXP, SEXP ilambdaSEXP, SEXP ibaseSEXP, SEXP ipowerSEXP, SEXP ioffsetSEXP, SEXP indSEXP, SEXP iburnSEXP, SEXP imSEXP, SEXP imgsizeSEXP, SEXP inkeeptrainSEXP, SEXP inkeeptestSEXP, SEXP inkeeptreedrawsSEXP, SEXP inprinteverySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< SEXP >::type ix(ixSEXP);
@@ -30,16 +30,15 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< SEXP >::type imgsize(imgsizeSEXP);
     Rcpp::traits::input_parameter< SEXP >::type inkeeptrain(inkeeptrainSEXP);
     Rcpp::traits::input_parameter< SEXP >::type inkeeptest(inkeeptestSEXP);
-    Rcpp::traits::input_parameter< SEXP >::type inkeeptestme(inkeeptestmeSEXP);
     Rcpp::traits::input_parameter< SEXP >::type inkeeptreedraws(inkeeptreedrawsSEXP);
     Rcpp::traits::input_parameter< SEXP >::type inprintevery(inprinteverySEXP);
-    rcpp_result_gen = Rcpp::wrap(cmonbart(ix, iy, ixp, itau, inu, ilambda, ibase, ipower, ioffset, ind, iburn, im, imgsize, inkeeptrain, inkeeptest, inkeeptestme, inkeeptreedraws, inprintevery));
+    rcpp_result_gen = Rcpp::wrap(cmonbart(ix, iy, ixp, itau, inu, ilambda, ibase, ipower, ioffset, ind, iburn, im, imgsize, inkeeptrain, inkeeptest, inkeeptreedraws, inprintevery));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_pmBART_cmonbart", (DL_FUNC) &_pmBART_cmonbart, 18},
+    {"_pmBART_cmonbart", (DL_FUNC) &_pmBART_cmonbart, 17},
     {NULL, NULL, 0}
 };
 
